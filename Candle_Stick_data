@@ -1,0 +1,111 @@
+
+import settrade.openapi
+import datetime
+import pyodbc
+
+from settrade.openapi import Investor
+from sympy import N
+
+#########################Login Part###########################
+investor = Investor(
+                app_id="2X8juZOkz3Hj2hp1",                                 # Your app ID
+                app_secret="V2habgw8gMeW9HdUC5EMG4J6Yvk0FMdELu86un4+jlk=", # Your app Secret
+                broker_id="SANDBOX",                                           
+                app_code="SANDBOX",
+                is_auto_queue = False)
+
+
+#equity = investor.Equity(account_no="Thanadej-E")                # Your account number
+
+market = investor.MarketData()
+mqtt = investor.MQTTWebsocket()
+
+
+
+strName2 = ['MPIC','LDC','D','PTTGC','HANA','COM7','CPN','BEM','SCGP','KCE','ESSO','BANPU','PTG','KTB','BAM','BTS','MTC','KTC','CPF','GFPT','TCAP','SPRC','IRPC']
+iDateStart = "2022-07-04T00:00:00"
+iDateStop =  "2022-07-08T23:59:00"
+iTimeFrame = "5m"                         #  '1m', '3m', '5m', '10m', '15m', '30m', '60m', '1d', '1w', '1M'
+iGetRec = 500
+
+iName = 0
+
+for xName in strName2:
+    
+    chartDataResponse = market.get_candlestick(xName,iTimeFrame,iGetRec,iDateStart,iDateStop,True)
+    chartDataResponse
+
+    x1=chartDataResponse
+
+    #######################################################
+
+    #====== ขั้นที่ 1 ====== 
+ 
+    for k,v in x1.items():
+
+        #====== ขั้นที่ 2 ======    
+        if k=='data':
+          
+            iName = iName+1
+
+            x2=v
+
+            print("\n")
+
+            for k,v in x2.items():
+               
+                #x3=v
+                
+                #print("\n")
+                    
+                if k=='time':
+                    Time_1=v
+                    
+                if k=='open':
+                    Open_1=v
+                
+                if k=='high':
+                    High_1=v
+            
+                if k=='low':
+                    Low_1=v
+            
+                if k=='close':
+                    Close_1=v
+                
+                if k=='volume':
+                    Volume_1=v
+                
+            print("\n")
+            for x in range(len(Volume_1)):
+                print(xName,"  --> Time.",iTimeFrame,"   Rec. :",x+1,"  ",datetime.datetime.fromtimestamp(int(Time_1[x])).strftime('%Y-%m-%d %H:%M:%S'),"  Open.",Open_1[x],"  High.",High_1[x],"  Low.",Low_1[x],"  Close.",Close_1[x],"  Volume.",Volume_1[x]) 
+
+            #print(len(High_1))
+            print("\n")
+
+            x1 = 1
+            x2 = 2
+
+            highLast = High_1[len(High_1)- x1]
+
+            for i in range(len(High_1)):
+
+                highLast_1 = High_1[len(High_1)- x1]
+                highLast_2 = High_1[len(High_1)- x2]
+
+                if (highLast_1 > highLast_2) and (highLast_1 >= highLast):
+
+                    BrHigh = highLast_1
+
+                    newBreak = xName,"\t",BrHigh,"\t",datetime.datetime.fromtimestamp(int(Time_1[len(High_1)- x1])).strftime('%Y-%m-%d %H:%M:%S')
+
+                    print("ตัวที่ ",len(High_1)- x1 + 1,"\t",xName,"\t",BrHigh,"\t",datetime.datetime.fromtimestamp(int(Time_1[len(High_1)- x1])).strftime('%Y-%m-%d %H:%M:%S'))
+                    break
+                
+                x1 +=1
+                x2 +=1
+
+print("\n\n")  
+print("Total = ",iName)      
+print("====================   End   ====================")
+print("\n\n")
